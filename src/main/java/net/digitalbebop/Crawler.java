@@ -1,17 +1,21 @@
 package net.digitalbebop;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.jsoup.Connection;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
+import org.jsoup.HttpStatusException;
 
 public class Crawler
-	extends Thread
+	implements Runnable
 {
-	private String baseURL;
+	private String baseDomain;
+	private URI baseURI;
 	private JafixManager manager;
 
 	private Document doc;
@@ -21,13 +25,18 @@ public class Crawler
 	 * Build a new crawling job, when run will traverse the given
 	 * URL. The manager is for making sure that found URL's are not 
 	 * already explored, and that new url's are schedule for traversal.
-	 * @param baseURL URL to crawl
+	 * @param url URL to crawl
 	 * @param manager Jafix Crawler Manager
 	 */
-	public Crawler(String baseURL, 
+	public Crawler(URI uri, 
 		       JafixManager manager)
+		throws URISyntaxException
 	{
-		this.baseURL = baseURL;
+		this.baseURI = uri;
+		this.baseDomain = this.baseURI.getHost();
+		if(this.baseDomain.startsWith("www."))
+			this.baseDomain = this.baseDomain.substring(4);
+
 		this.manager = manager;
 	}
 	
@@ -38,17 +47,50 @@ public class Crawler
 	@Override
 	public void run()
 	{
+		int scheduled;
+
+		scheduled = 0;
+		
 		try {
-			doc = Jsoup.connect(this.baseURL).get();
+			doc = Jsoup.connect(this.baseURI.toString()).get();
 			tags = doc.getElementsByTag("a");
-			
+
 			for(Element element : tags) {
-				System.out.println("<a>: " + element.absUrl("href"));
-				manager.schedUrl(element.absUrl("href"));
+				URI luri;
+				String domain;
+
+				try {
+					luri = new URI(element.absUrl("href"));
+
+					domain = luri.getHost();
+					if(domain.startsWith("www."))
+						domain = domain.substring(4);
+
+					if(domain.equals(this.baseDomain))
+					{	
+						/* Schedule for next traversal */
+						if(manager.schedURI(luri))
+							++scheduled;
+					}
+				}
+				catch(URISyntaxException e) {
+					System.err.println(e.getMessage());
+					continue;
+				}
 			}
+		}
+		catch(HttpStatusException e) {
+			System.err.println(e.getMessage());
 		}
 		catch(IOException e) {
 			e.printStackTrace();
+		}
+
+		int count = manager.getActiveCrawlersCount();
+		if(manager.getActiveCrawlersCount() == 1 &&
+		   scheduled == 0) {
+			/* We're done */
+			System.exit(0);
 		}
 	}
 }

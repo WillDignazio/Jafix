@@ -1,5 +1,8 @@
 package net.digitalbebop;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.CommandLine;
@@ -13,6 +16,7 @@ public class Jafix
 
 	public static void main(String[] args)
 	{
+		URI uri;
 		JafixManager manager;
 		CommandLineParser parser;
 		CommandLine cmd;
@@ -26,12 +30,23 @@ public class Jafix
 			parser = new BasicParser();
 			cmd = parser.parse(opts, args);
 
-			Crawler crawler = new Crawler(args[0], manager);
-			crawler.start();
+			try {
+				uri = new URI(args[0]);
+				manager.schedURI(uri);
+				manager.generateReport();
+			}
+			catch(InterruptedException e) {
+			}
+			catch(URISyntaxException e) {
+				System.err.println(e.getMessage());
+				System.exit(1);
+			}
 		}
 		catch(ParseException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
+
+		System.out.println("waiting for completion");
 	}
 }
