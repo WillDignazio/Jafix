@@ -47,17 +47,6 @@ public class JafixManager
 	}
 
 	/**
-	 * Get the root URI for this manager. 
-	 * By providing this, we can let our crawlers determine if they give
-	 * up on a URL outside of the root domain.
-	 * @return uri Root URI for this manager
-	 */
-	public URI getRootURI()
-	{
-		return this.rootURI;
-	}
-
-	/**
 	 * Schedule a URL to be traversed, if the URL has already been
 	 * traversed, then drop it and continue on with life.
 	 *

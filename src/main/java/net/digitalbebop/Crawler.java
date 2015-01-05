@@ -15,8 +15,6 @@ public class Crawler
 	implements Runnable
 {
 	private JafixManager manager;
-	private Document doc;
-	private Elements tags;
 	private URI baseURI;
 
 	/**
@@ -42,6 +40,8 @@ public class Crawler
 	@Override
 	public void run()
 	{
+		Document doc;
+		Elements tags;
 		int scheduled;
 
 		scheduled = 0;
@@ -75,7 +75,6 @@ public class Crawler
 			manager.reportURI(baseURI, e);
 		}
 
-		int count = manager.getActiveCrawlersCount();
 		if(manager.getActiveCrawlersCount() == 1 &&
 		   scheduled == 0) {
 			/* We're done */
