@@ -80,7 +80,12 @@ public class Crawler
 			}
 		}
 		catch(HttpStatusException e) {
-			System.err.println(e.getMessage());
+			/*
+			 * We've found a bad URL that needs to be included in the
+			 * report, from here we hand it off to the report log.
+			 * In the end, this will be included in report file.
+			 */
+			manager.reportUrl(baseURI.toString(), e);
 		}
 		catch(IOException e) {
 			e.printStackTrace();
@@ -90,7 +95,7 @@ public class Crawler
 		if(manager.getActiveCrawlersCount() == 1 &&
 		   scheduled == 0) {
 			/* We're done */
-			System.exit(0);
+			manager.stopCrawling();
 		}
 	}
 }

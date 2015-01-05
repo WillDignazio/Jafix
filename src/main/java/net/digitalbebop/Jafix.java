@@ -35,8 +35,6 @@ public class Jafix
 				manager.schedURI(uri);
 				manager.generateReport();
 			}
-			catch(InterruptedException e) {
-			}
 			catch(URISyntaxException e) {
 				System.err.println(e.getMessage());
 				System.exit(1);
@@ -46,7 +44,5 @@ public class Jafix
 			e.printStackTrace();
 			System.exit(1);
 		}
-
-		System.out.println("waiting for completion");
 	}
 }
