@@ -11,8 +11,7 @@ import org.apache.commons.cli.ParseException;
 
 public class Jafix
 {
-	public static final int DEFAULT_MAXDEPTH = 4;
-	public static final int DEFAULT_CRAWLERS = 4;
+	public static final int DEFAULT_CRAWLERS = Runtime.getRuntime().availableProcessors();
 
 	public static void main(String[] args)
 	{
@@ -24,7 +23,6 @@ public class Jafix
 
 		opts = new Options();
 		opts.addOption("url", true, "Origin URL for broken link scan");
-		manager = new JafixManager(DEFAULT_CRAWLERS);
 
 		try {
 			parser = new BasicParser();
@@ -32,7 +30,9 @@ public class Jafix
 
 			try {
 				uri = new URI(args[0]);
-				manager.schedURI(uri);
+
+				manager = new JafixManager(uri, DEFAULT_CRAWLERS);
+				manager.schedURI(uri, uri);
 				manager.generateReport();
 			}
 			catch(URISyntaxException e) {
